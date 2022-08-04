@@ -7,7 +7,7 @@ import requests
 from xmltodict import parse, unparse
 
 # custom functions
-from .Calculation_gdal import raster_value
+# from .Calculation_gdal import raster_value
 from .Style import catagorize_xml, classified_xml, coverage_style_xml, outline_only_xml
 from .supports import prepare_zip_file
 
@@ -1008,92 +1008,92 @@ class Geoserver:
         except Exception as e:
             return "Error: {}".format(e)
 
-    def create_coveragestyle(
-        self,
-        raster_path: str,
-        style_name: Optional[str] = None,
-        workspace: str = None,
-        color_ramp: str = "RdYlGn_r",
-        cmap_type: str = "ramp",
-        number_of_classes: int = 5,
-    ):
-        """
+    # def create_coveragestyle(
+    #     self,
+    #     raster_path: str,
+    #     style_name: Optional[str] = None,
+    #     workspace: str = None,
+    #     color_ramp: str = "RdYlGn_r",
+    #     cmap_type: str = "ramp",
+    #     number_of_classes: int = 5,
+    # ):
+    #     """
 
-        Parameters
-        ----------
-        raster_path : str
-        style_name : str, optional
-        workspace : str
-        color_ramp : str
-        cmap_type : str
-            # TODO: This should be a set of the available options : {"ramp", "linear", ... }
-        number_of_classes : int
-        overwrite : bool
+    #     Parameters
+    #     ----------
+    #     raster_path : str
+    #     style_name : str, optional
+    #     workspace : str
+    #     color_ramp : str
+    #     cmap_type : str
+    #         # TODO: This should be a set of the available options : {"ramp", "linear", ... }
+    #     number_of_classes : int
+    #     overwrite : bool
 
-        Notes
-        -----
-        The name of the style file will be, rasterName:workspace
-        This function will dynamically create the style file for raster.
-        Inputs: name of file, workspace, cmap_type (two options: values, range), ncolors: determines the number of class, min for minimum value of the raster, max for the max value of raster
-        """
-        raster = raster_value(raster_path)
-        min_value = raster["min"]
-        max_value = raster["max"]
-        if style_name is None:
-            style_name = raster["file_name"]
-        coverage_style_xml(
-            color_ramp,
-            style_name,
-            cmap_type,
-            min_value,
-            max_value,
-            number_of_classes,
-        )
-        style_xml = "<style><name>{}</name><filename>{}</filename></style>".format(
-            style_name, style_name + ".sld"
-        )
+    #     Notes
+    #     -----
+    #     The name of the style file will be, rasterName:workspace
+    #     This function will dynamically create the style file for raster.
+    #     Inputs: name of file, workspace, cmap_type (two options: values, range), ncolors: determines the number of class, min for minimum value of the raster, max for the max value of raster
+    #     """
+    #     raster = raster_value(raster_path)
+    #     min_value = raster["min"]
+    #     max_value = raster["max"]
+    #     if style_name is None:
+    #         style_name = raster["file_name"]
+    #     coverage_style_xml(
+    #         color_ramp,
+    #         style_name,
+    #         cmap_type,
+    #         min_value,
+    #         max_value,
+    #         number_of_classes,
+    #     )
+    #     style_xml = "<style><name>{}</name><filename>{}</filename></style>".format(
+    #         style_name, style_name + ".sld"
+    #     )
 
-        if style_name is None:
-            style_name = os.path.basename(raster_path)
-            f = style_name.split(".")
-            if len(f) > 0:
-                style_name = f[0]
+    #     if style_name is None:
+    #         style_name = os.path.basename(raster_path)
+    #         f = style_name.split(".")
+    #         if len(f) > 0:
+    #             style_name = f[0]
 
-        headers = {"content-type": "text/xml"}
-        url = "{}/rest/workspaces/{}/styles".format(self.service_url, workspace)
-        sld_content_type = "application/vnd.ogc.sld+xml"
-        header_sld = {"content-type": sld_content_type}
+    #     headers = {"content-type": "text/xml"}
+    #     url = "{}/rest/workspaces/{}/styles".format(self.service_url, workspace)
+    #     sld_content_type = "application/vnd.ogc.sld+xml"
+    #     header_sld = {"content-type": sld_content_type}
 
-        if workspace is None:
-            url = "{}/rest/styles".format(self.service_url)
+    #     if workspace is None:
+    #         url = "{}/rest/styles".format(self.service_url)
 
-        r = None
-        try:
-            r = self._requests(
-                "post",
-                url,
-                data=style_xml,
-                headers=headers,
-            )
+    #     r = None
+    #     try:
+    #         r = self._requests(
+    #             "post",
+    #             url,
+    #             data=style_xml,
+    #             headers=headers,
+    #         )
 
-            with open("style.sld", "rb") as f:
-                r_sld = requests.put(
-                    url + "/" + style_name,
-                    data=f.read(),
-                    auth=(self.username, self.password),
-                    headers=header_sld,
-                )
-                if r_sld.status_code not in [200, 201]:
-                    return "{}: Style file can not be uploaded! {}".format(
-                        r.status_code, r.content
-                    )
+    #         with open("style.sld", "rb") as f:
+    #             r_sld = requests.put(
+    #                 url + "/" + style_name,
+    #                 data=f.read(),
+    #                 auth=(self.username, self.password),
+    #                 headers=header_sld,
+    #             )
+    #             if r_sld.status_code not in [200, 201]:
+    #                 return "{}: Style file can not be uploaded! {}".format(
+    #                     r.status_code, r.content
+    #                 )
 
-            os.remove("style.sld")
+    #         os.remove("style.sld")
 
-            return r_sld.status_code
+    #         return r_sld.status_code
 
-        except Exception as e:
-            return "Error: {}".format(e)
+    #     except Exception as e:
+    #         return "Error: {}".format(e)
 
     def create_catagorized_featurestyle(
         self,
